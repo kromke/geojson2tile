@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from flask import Flask, jsonify, send_file, abort
 
@@ -52,7 +53,7 @@ def file_exists(file_path):
 
 def send_and_remove_file(file_path):
     response = send_file(file_path)
-    os.remove(handler.out_folder)
+    shutil.rmtree(handler.out_folder)
     return response
 
 
