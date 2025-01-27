@@ -34,7 +34,11 @@ def upload_file():
 
 @app.route('/v1/<string:id>/<int:z>/<int:x>/<int:y>', methods=['GET'])
 def get_tile(id, z, x, y):
-    handler.save_tile(id, z, x, y)
+    try:
+        handler.save_tile(id, z, x, y)
+    except AssertionError:
+        return abort(404, description="Id not found")
+
     file_path = construct_file_path(id, z, x, y)
 
     if file_exists(file_path):
