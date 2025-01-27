@@ -17,7 +17,7 @@ def ensure_folder_exists(folder):
         os.makedirs(folder)
 
 
-def create_error_response(self, message, status_code):
+def create_error_response(message, status_code):
     return jsonify({"error": message}), status_code
 
 

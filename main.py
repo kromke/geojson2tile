@@ -19,11 +19,11 @@ def test():
 @app.route('/v1/upload', methods=['POST'])
 def upload_file():
     result, code = uploader.save_file()
-    file_name, file_path = result
-    handler.reprod(file_path, file_name)
     if code == 400:
         return result, code
     else:
+        file_name, file_path = result
+        handler.reprod(file_path, file_name)
         file_size = os.path.getsize(file_path)
         os.remove(file_path)
         return jsonify({"message": f"File '{file_name}' uploaded successfully",
