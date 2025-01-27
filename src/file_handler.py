@@ -50,7 +50,7 @@ class FileHandler:
         )
         gdal2tiles(
             ["this arg is required but ignored", buffds, o_f, "-z",
-             f"{z}", "-e", "-q", "-w", "none", "-x"])
+             f"{z}", "-e", "-q", "-w", "none", "-a"])
 
         os.remove(buffds)
 

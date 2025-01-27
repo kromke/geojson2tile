@@ -52,7 +52,7 @@ def file_exists(file_path):
 
 def send_and_remove_file(file_path):
     response = send_file(file_path)
-    os.remove(file_path)
+    os.remove(handler.out_folder)
     return response
 
 
