@@ -25,6 +25,7 @@ def upload_file():
         return result, code
     else:
         file_size = os.path.getsize(file_path)
+        os.remove(file_path)
         return jsonify({"message": f"File '{file_name}' uploaded successfully",
                         "size": f'{file_size / 1024 / 1024:.1f} Mb',
                         "key": file_name})

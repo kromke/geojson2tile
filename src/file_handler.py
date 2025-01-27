@@ -21,7 +21,6 @@ class FileHandler:
         reprods = os.path.join(h_f, 'epsg3857.geojson')
         gdal.VectorTranslate(reprods, input_file, dstSRS="epsg:3857",
                              reproject=True)
-        os.remove(input_file)
 
     def save_tile(self, id, z, x, y):
         h_f = os.path.join(self.handle_folder, id)
