@@ -1,7 +1,8 @@
 import os
 
 from osgeo import gdal
-from osgeo_utils.gdal2tiles import GlobalMercator, main as gdal2tiles
+from osgeo_utils.gdal2tiles import GlobalMercator
+from osgeo_utils.gdal2tiles import main as gdal2tiles
 
 from src.file_uploader import ensure_folder_exists
 
@@ -22,18 +23,19 @@ class FileHandler:
         gdal.VectorTranslate(reprods, input_file, dstSRS="epsg:3857",
                              reproject=True)
 
-    def save_tile(self, id, z, x, y):
-        h_f = os.path.join(self.handle_folder, id)
+
+    def save_tile(self, id_, z, x, y, session_name):
+        h_f = os.path.join(self.handle_folder, id_)
         if not os.path.exists(h_f):
             raise AssertionError("file not exists")
 
         reprods = os.path.join(h_f, 'epsg3857.geojson')
         gm = GlobalMercator()
 
-        o_f = os.path.join(self.out_folder, id)
+        o_f = os.path.join(self.out_folder, id_, session_name)
         ensure_folder_exists(o_f)
 
-        buffds = os.path.join(h_f, f'epsg3857buff{z}.tif')
+        buffds = os.path.join(o_f, f'{session_name}.tif')
         resolution = gm.Resolution(z)
         bounds = gm.TileBounds(x, y, z)
 
@@ -53,6 +55,5 @@ class FileHandler:
              f"{z}", "-e", "-q", "-w", "none", "-x"])
 
         os.remove(buffds)
+        return o_f
 
-    def delete_tile(self, id, z, x, y):
-        os.remove(os.path.join(self.out_folder, id, str(z), str(x), f'{y}.png'))

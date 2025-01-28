@@ -1,0 +1,10 @@
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11378 
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11379 
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11380 
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11381 
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11382 
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11383 
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11384 
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11385 
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11386 
+url = http://0.0.0.0:5000/v1/geotestJson_tumen_v2/14/11186/11387

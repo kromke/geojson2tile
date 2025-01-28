@@ -1,0 +1,10 @@
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45484 
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45485 
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45486 
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45487 
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45488 
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45489 
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45490 
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45491 
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45492 
+url = http://90.156.171.90:5000/v1/geotestJson_tumen_v2/16/44699/45493

@@ -7,8 +7,7 @@
 
 `curl --location 'http://0.0.0.0:5000'` -> `OK`
 
-`curl --location 'http://0.0.0.0:5000/v1/upload' \
---form 'file=@"./geotestJson_tumen_v2.json"'` ->
+`curl --location 'http://0.0.0.0:5000/v1/upload' --form 'file=@"./geotestJson_tumen_v2.json"'` ->
 `{
 "key": "geotestJson_tumen_v2",
 "message": "File 'geotestJson_tumen_v2' uploaded successfully",
@@ -22,3 +21,6 @@
 14/11186/11378
 13/5589/5690
 12/2791/2846
+
+из папки test можно проверить одновременое выполнение
+`curl --parallel --parallel-immediate --parallel-max 10 --remote-name-all --config ../test_14_d.txt`
