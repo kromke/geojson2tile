@@ -36,7 +36,7 @@ class FileHandler:
         ensure_folder_exists(o_f)
 
         buffds = os.path.join(o_f, f'{session_name}.tif')
-        resolution = gm.Resolution(z)
+        resolution = gm.Resolution(z + 1)
         bounds = gm.TileBounds(x, y, z)
 
         gdal.Rasterize(
@@ -52,7 +52,7 @@ class FileHandler:
         )
         gdal2tiles(
             ["this arg is required but ignored", buffds, o_f, "-z",
-             f"{z}", "-e", "-q", "-w", "none", "-x"])
+             f"{z}", "-q", "-w", "none", "--xyz"])
 
         os.remove(buffds)
         return o_f
