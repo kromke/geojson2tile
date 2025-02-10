@@ -27,6 +27,9 @@ class FileUploader:
         ensure_folder_exists(self.upload_folder)
 
     def save_file(self):
+        '''
+        Сохранение файла
+        '''
         file = get_file_from_request()
         if file is None:
             return create_error_response("No file part", 400)

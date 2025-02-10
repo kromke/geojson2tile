@@ -1,6 +1,5 @@
 import os
 import shutil
-from uuid import uuid4
 
 from flask import Flask, jsonify, send_file, abort
 
@@ -20,26 +19,29 @@ def test():
 
 @app.route('/v1/upload', methods=['POST'])
 def upload_file():
+    '''
+    Загрузка файла
+    '''
     result, code = uploader.save_file()
     if code == 400:
         return result, code
-    else:
-        file_name, file_path = result
-        handler.reprod(file_path, file_name)
-        file_size = os.path.getsize(file_path)
-        os.remove(file_path)
-        return jsonify({"message": f"File '{file_name}' uploaded successfully",
-                        "size": f'{file_size / 1024 / 1024:.1f} Mb',
-                        "key": file_name})
+
+    file_name, file_path = result  # type: ignore
+    file_size = os.path.getsize(file_path)
+    handler.handle_upload_geojson(file_path, file_name)
+    return jsonify({"message": f"File '{file_name}' uploaded successfully",
+                    "size": f'{file_size / 1024 / 1024:.1f} Mb',
+                    "key": file_name})
 
 
 @app.route('/v1/<string:id>/<int:z>/<int:x>/<int:y>', methods=['GET'])
 def get_tile(id, z, x, y):
-    ## TODO при создании растра и тайла использовать уникальное имя сессии
-    session_name = str(uuid4())
+    '''
+    Получить тайл
+    '''
     o_f = ''
     try:
-        o_f = handler.save_tile(id, z, x, y, session_name)
+        o_f = handler.save_tile(id, z, x, y)
     except AssertionError:
         return abort(404, description="Id not found")
 
@@ -47,8 +49,8 @@ def get_tile(id, z, x, y):
 
     if file_exists(file_path):
         return send_and_remove_file(file_path, o_f)
-    else:
-        abort(404, description="Tile not found")
+
+    abort(404, description="Tile not found")
 
 
 def construct_file_path(o_f, z, x, y):
