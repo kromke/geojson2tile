@@ -1,6 +1,7 @@
 version: '2'
 services:
   app:
+    restart: always
     build:
       context: .
     container_name: app
