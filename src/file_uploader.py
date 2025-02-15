@@ -7,7 +7,7 @@ def get_file_from_request():
     return request.files.get('file')
 
 
-def get_filename(file):
+def get_filename(file) -> str:
     filename = file.filename.split(".")[0]
     return filename if filename else None
 
@@ -34,7 +34,7 @@ class FileUploader:
         if file is None:
             return create_error_response("No file part", 400)
 
-        filename = get_filename(file)
+        filename: str = get_filename(file)
         if filename is None:
             return create_error_response("No selected file", 400)
 
