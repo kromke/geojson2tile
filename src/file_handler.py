@@ -1,6 +1,3 @@
-"""
-File Handler module
-"""
 import json
 import os
 import re
@@ -18,9 +15,6 @@ def get_basename(file):
 
 
 def save_color_table(color_table, h_f):
-    """
-    Сохранение таблицы цветов
-    """
     file = os.path.join(h_f, 'color_table')
     with open(file, 'w+', encoding='utf-8') as f:
         f.write(color_table)
@@ -61,9 +55,6 @@ def add_color_numbers_to_file(filename, color_dict: dict,
 
 
 def reprod(input_file, handle_folder):
-    """
-    трансформация файла в data_source
-    """
     reprods = os.path.join(handle_folder, "epsg3857.geojson")
     input_filename = input_file.name
     gdal.VectorTranslate(reprods, input_filename,
@@ -71,11 +62,6 @@ def reprod(input_file, handle_folder):
 
 
 def get_color_dict(filename):
-    """
-    Получение словаря цветов.
-    Читать файл и находить паттерн типа "color":"#BDBDBD"
-    Складывать в словарь с порядковым значением
-    """
     color_dict = {'#000000': 0}
     with open(filename, 'r', encoding='utf-8') as file:
         for line in file:
@@ -89,9 +75,6 @@ def get_color_dict(filename):
 
 
 class FileHandler:
-    """
-    Обработчик файлов geojson для создания тайла
-    """
 
     def __init__(
             self, handle_folder="../handle", out_folder="../out",
@@ -105,13 +88,6 @@ class FileHandler:
         self.gm = GlobalMercator()
 
     def handle_upload_geojson(self, input_file):
-        """
-            извлечь цвета в файл /handle/layer_name/colors,
-            добавить в загруженный файл порядковые номера цветов,
-            трансформировать в datasource сохранить в
-            /handle/layer_name/epsg3857.geojson
-            удалить файл /uploads/layer_name
-        """
         h_f = self.get_handle_dir(input_file)
         ensure_folder_exists(h_f)
         color_dict = get_color_dict(input_file)
@@ -137,12 +113,9 @@ class FileHandler:
         o_f = os.path.join(self.out_folder, id_, session_name)
         ensure_folder_exists(o_f)
         raster = self.rasterize(reprods, z, bounds, session_name)
-        # Достаем стили
         vrt = self.get_vrt(raster, session_name)
         color_table = self.get_color_table(h_f)
-        # Добавляем таблицу цветов в стили
         vrt = self.add_colors_to_vrt(vrt, color_table)
-        # Красим растр
         raster_c = self.get_colored_raster(vrt, session_name)
         vrt_1 = vrt.replace('.vrt', '_1.vrt')
         gdal.Translate(vrt_1, raster_c, format='VRT', rgbExpand='rgba')
@@ -212,22 +185,16 @@ class FileHandler:
         return colors
 
     def hex_to_rgba(self, hex_code):
-        red = int(hex_code[1:3], 16);
-        green = int(hex_code[3:5], 16);
-        blue = int(hex_code[5:7], 16);
-        return (red, green, blue, 255)
+        red = int(hex_code[1:3], 16)
+        green = int(hex_code[3:5], 16)
+        blue = int(hex_code[5:7], 16)
+        return red, green, blue, 255
 
     def get_bounds(self, x, y, z):
-        '''
-        Рассчет границ растра
-        '''
         x_g, y_g = self.gm.GoogleTile(x, y, z)
         return self.gm.TileBounds(x_g, y_g, z)
 
     def rasterize(self, reprods, zoom, bounds, session_name):
-        '''
-        Растеризация
-        '''
         resolution = self.gm.Resolution(zoom + 2)
         path = os.path.dirname(reprods)
         buffds = os.path.join(path, f"{session_name}.tif")
