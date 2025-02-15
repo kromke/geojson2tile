@@ -3,10 +3,6 @@ import os
 from flask import request, jsonify
 
 
-def get_file_from_request():
-    return request.files.get('file')
-
-
 def get_filename(file):
     return file.filename.split(".")[0]
 
@@ -29,7 +25,7 @@ class FileUploader:
         """
         Сохранение файла
         """
-        file = get_file_from_request()
+        file = request.files.get('file')
         if file is None:
             return create_error_response("No file part", 400)
 
