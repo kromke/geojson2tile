@@ -19,9 +19,9 @@ def test():
 
 @app.route('/v1/upload', methods=['POST'])
 def upload_file():
-    '''
+    """
     Загрузка файла
-    '''
+    """
     result, code = uploader.save_file()
     if code == 400:
         return result, code
@@ -36,9 +36,9 @@ def upload_file():
 
 @app.route('/v1/<string:id>/<int:z>/<int:x>/<int:y>', methods=['GET'])
 def get_tile(id, z, x, y):
-    '''
+    """
     Получить тайл
-    '''
+    """
     o_f = ''
     try:
         o_f = handler.save_tile(id, z, x, y)
