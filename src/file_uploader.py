@@ -37,8 +37,8 @@ class FileUploader:
         if filename is None:
             return create_error_response("No selected file", 400)
 
-        file_path = self.save_file_to_disk(file, filename)
-        return [filename, file_path], 200
+        saved_file_path = self.save_file_to_disk(file, filename)
+        return [filename, saved_file_path], 200
 
     def save_file_to_disk(self, file, filename):
         file_path = os.path.join(self.upload_folder, filename)
