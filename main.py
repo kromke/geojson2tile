@@ -22,10 +22,10 @@
 """
 
 import os
-import shutil
 
-from flask import Flask, jsonify, send_file, abort, request
+from flask import Flask, abort, jsonify, request
 
+from src.common import construct_file_path, file_exists, send_and_remove_file
 from src.file_handler import FileHandler, get_basename
 from src.file_uploader import FileUploader
 
@@ -47,8 +47,8 @@ def test():
 @app.route('/v1/upload', methods=['POST'])
 def upload_file():
     """
-    Загрузить файл на диск в /uploads/layer_name,
-    вернуть ответ
+    Загрузить файл на диск в /uploads/layer_name, обработать.
+    :return: json
     """
     file = uploader.save_file()
     if not file:
@@ -79,20 +79,6 @@ def get_tile(layer_id, z, x, y):
         return send_and_remove_file(file_path, o_f)
 
     abort(404, description="Tile not found")
-
-
-def construct_file_path(o_f, z, x, y):
-    return os.path.join(o_f, str(z), str(x), f'{y}.png')
-
-
-def file_exists(file_path):
-    return os.path.exists(file_path)
-
-
-def send_and_remove_file(file_path, o_f):
-    response = send_file(file_path)
-    shutil.rmtree(o_f)
-    return response
 
 
 if __name__ == '__main__':
