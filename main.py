@@ -1,7 +1,30 @@
+"""
+Модуль для обработки и управления GeoJSON файлами с использованием Flask.
+
+Этот модуль предоставляет веб-интерфейс для загрузки GeoJSON файлов, их обработки
+и получения тайлов. Он включает в себя следующие основные функции:
+
+1. Загрузка файлов: Позволяет пользователям загружать GeoJSON файлы на сервер.
+2. Обработка файлов: Обрабатывает загруженные файлы, добавляя порядковые номера цветов
+   и трансформируя их в нужный формат.
+3. Получение тайлов: Предоставляет возможность получать тайлы на основе загруженных
+   и обработанных GeoJSON файлов.
+
+Основные маршруты:
+- GET /: Тестовый маршрут для проверки работы сервера.
+- POST /v1/upload: Загружает файл на сервер.
+- GET /v1/<layer_id>/<z>/<x>/<y>: Получает тайл по заданным параметрам.
+
+Зависимости:
+- Flask
+- src.file_handler
+- src.file_uploader
+"""
+
 import os
 import shutil
 
-from flask import Flask, jsonify, send_file, abort
+from flask import Flask, jsonify, send_file, abort, request
 
 from src.file_handler import FileHandler, get_basename
 from src.file_uploader import FileUploader
@@ -36,14 +59,13 @@ def upload_file():
                     "key": filename})
 
 
-@app.route('/v1/<string:id>/<int:z>/<int:x>/<int:y>', methods=['GET'])
-def get_tile(id, z, x, y):
-    """
-    Получить тайл
-    """
-    o_f = ''
+@app.route('/v1/<string:layer_id>/<int:z>/<int:x>/<int:y>', methods=['GET'])
+def get_tile(layer_id, z, x, y):
+    zoom_add_raster = request.args.get('zoom_add_raster', default=2, type=int)
+    black = request.args.get('black', default=False, type=bool)
+
     try:
-        o_f = handler.save_tile(id, z, x, y)
+        o_f = handler.save_tile(layer_id, z, x, y, zoom_add_raster, black)
     except AssertionError:
         return abort(404, description="Id not found")
 
