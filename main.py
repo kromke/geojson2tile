@@ -3,7 +3,7 @@ import shutil
 
 from flask import Flask, jsonify, send_file, abort
 
-from src.file_handler import FileHandler
+from src.file_handler import FileHandler, get_basename
 from src.file_uploader import FileUploader
 
 app = Flask(__name__)
@@ -20,18 +20,20 @@ def test():
 @app.route('/v1/upload', methods=['POST'])
 def upload_file():
     """
-    Загрузка файла
+    Загрузить файл на диск в /uploads/layer_name,
+    вернуть ответ
     """
-    result, code = uploader.save_file()
-    if code == 400:
-        return result, code
+    file = uploader.save_file()
+    if not file:
+        return "Загрузка не удалась", 400
 
-    file_name, file_path = result  # type: ignore
-    file_size = os.path.getsize(file_path)
-    handler.handle_upload_geojson(file_path, file_name)
-    return jsonify({"message": f"File '{file_name}' uploaded successfully",
-                    "size": f'{file_size / 1024 / 1024:.1f} Mb',
-                    "key": file_name})
+    filesize = os.path.getsize(file)
+    filename = get_basename(file)
+
+    handler.handle_upload_geojson(file)
+    return jsonify({"message": f"File '{filename}' uploaded successfully",
+                    "size": f'{filesize / 1024 / 1024:.1f} Mb',
+                    "key": filename})
 
 
 @app.route('/v1/<string:id>/<int:z>/<int:x>/<int:y>', methods=['GET'])
