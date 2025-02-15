@@ -37,6 +37,10 @@ handler = FileHandler()
 
 @app.route('/', methods=['GET'])
 def test():
+    """
+    Тестовый метод проверки работоспособности
+    :return: str
+    """
     return 'OK'
 
 
