@@ -25,7 +25,7 @@ import os
 
 from flask import Flask, abort, jsonify, request
 
-from src.common import construct_file_path, file_exists, send_and_remove_file
+from src.common import file_exists, send_and_remove_file
 from src.file_handler import FileHandler, get_basename
 from src.file_uploader import FileUploader
 
@@ -87,7 +87,7 @@ def get_tile(layer_id, z, x, y):
     except AssertionError:
         return abort(404, description="Id not found")
 
-    file_path = construct_file_path(o_f, z, x, y)
+    file_path = os.path.join(o_f, str(z), str(x), f'{y}.png')
 
     if file_exists(file_path):
         return send_and_remove_file(file_path, o_f)
