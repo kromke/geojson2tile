@@ -1,3 +1,21 @@
+"""
+File: file_handler.py
+Description: 
+    Модуль для работы с географическими данными и файлами
+    Этот модуль предоставляет утилиты для работы с географическими данными,
+    включая загрузку и преобразование изображений.
+    В нем используются библиотеки `osgeo` для работы с GDAL и другие стандартные библиотеки Python.
+Импортируемые модули
+- **json**: Для работы с JSON данными.
+- **os**: Для операций с файловой системой.
+- **re**: Для работы с регулярными выражениями.
+- **uuid**: Для генерации уникальных идентификаторов.
+- **gdal** из библиотеки **osgeo**: Для работы с географическими данными.
+- **gdal2tiles** из библиотеки **osgeo_utils**:
+    Утилита для преобразования изображений в набор тайлов.
+- **ensure_folder_exists** из модуля **src.file_uploader**:
+    Для обеспечения существования директории.
+"""
 import json
 import os
 import re
@@ -83,9 +101,9 @@ class FileHandler:
         self.handle_folder = handle_folder
         self.out_folder = out_folder
         self.rgb = rgb
+        self.gm = GlobalMercator()
         ensure_folder_exists(self.handle_folder)
         ensure_folder_exists(self.out_folder)
-        self.gm = GlobalMercator()
 
     def handle_upload_geojson(self, input_file):
         h_f = self.get_handle_dir(input_file)
@@ -118,16 +136,16 @@ class FileHandler:
 
         out_folder = os.path.join(self.out_folder, layer_id, session_name)
         ensure_folder_exists(out_folder)
-        
-        srs = None
-        if blck: 
-            srs = self.rasterize(reprods, z, bounds, session_name)
+
+        raster = self.rasterize(reprods, z, bounds, out_folder, za, blck)
+
+        if blck:
+            srs = raster
         else:
-            raster = self.rasterize(reprods, z, bounds, session_name)
-            vrt = self.get_vrt(raster, session_name)
+            vrt = self.get_vrt(raster, out_folder)
             color_table = self.get_color_table(h_f)
             vrt = self.add_colors_to_vrt(vrt, color_table)
-            raster_c = self.get_colored_raster(vrt, session_name)
+            raster_c = self.get_colored_raster(vrt, out_folder)
             srs = vrt.replace('.vrt', '_1.vrt')
             gdal.Translate(srs, raster_c, format='VRT', rgbExpand='rgba')
 
@@ -146,21 +164,15 @@ class FileHandler:
             ]
         )
 
-        os.remove(raster)
-        os.remove(vrt)
-        os.remove(raster_c)
-        os.remove(srs)
         return out_folder
 
-    def get_colored_raster(self, vrt, session_name):
-        path = os.path.dirname(vrt)
-        raster_c = os.path.join(path, f"{session_name}_c.tif")
+    def get_colored_raster(self, vrt, out_folder):
+        raster_c = os.path.join(out_folder, 'raster_c.tif')
         gdal.Translate(raster_c, vrt)
         return raster_c
 
-    def get_vrt(self, raster, session_name):
-        path = os.path.dirname(raster)
-        vrt = os.path.join(path, f"{session_name}.vrt")
+    def get_vrt(self, raster, out_folder):
+        vrt = os.path.join(out_folder, 'vrt.vrt')
         gdal.Translate(vrt, raster, format='VRT')
         return vrt
 
@@ -171,7 +183,7 @@ class FileHandler:
         content = re.sub(r'<ColorInterp>.*</ColorInterp>',
                          '<ColorInterp>Palette</ColorInterp>', content)
         content = content.replace('</ColorInterp>', '</ColorInterp>' + colors)
-        with open(vrt, 'w') as f:
+        with open(vrt, 'w', encoding='utf-8') as f:
             f.write(content)
         return vrt
 
@@ -190,8 +202,7 @@ class FileHandler:
         colors = sorted(color_dict.items(), key=lambda x: x[1])
         colors = [c[0] for c in colors]
         colors = [self.hex_to_rgba(c) for c in colors]
-        colors = [f'<Entry c1="{c[0]}" c2="{c[1]}" c3="{c[2]}" c4="{c[3]}"/>'
-                  for c in colors]  # type: ignore
+        colors = [f'<Entry c1="{c[0]}" c2="{c[1]}" c3="{c[2]}" c4="{c[3]}"/>' for c in colors]  
         colors = '<ColorTable>' + ''.join(colors) + '</ColorTable>'
         return colors
 
@@ -205,10 +216,9 @@ class FileHandler:
         x_g, y_g = self.gm.GoogleTile(x, y, z)
         return self.gm.TileBounds(x_g, y_g, z)
 
-    def rasterize(self, reprods, zoom, bounds, session_name, za, blck):
+    def rasterize(self, reprods, zoom, bounds, out_folder, za, blck):
         resolution = self.gm.Resolution(zoom + int(za))
-        path = os.path.dirname(reprods)
-        buffds = os.path.join(path, f"{session_name}.tif")
+        buffds = os.path.join(out_folder, 'raster.tif')
         if blck:
             gdal.Rasterize(
             buffds,

@@ -65,6 +65,20 @@ def upload_file():
 
 @app.route('/v1/<string:layer_id>/<int:z>/<int:x>/<int:y>', methods=['GET'])
 def get_tile(layer_id, z, x, y):
+    """
+    route для получения картографических тайлов.
+    Обрабатывает GET-запросы, возвращая картографические тайлы по идентификатору слоя,
+    уровню масштаба и координатам тайла.
+    Обрабатывает параметры `zoom_add_raster` и `black`.
+    :route:
+        /v1/<string:layer_id>/<int:z>/<int:x>/<int:y>
+    :args:
+        zoom_add_raster (необязательный): целочисленный, по умолчанию 2.
+        black (необязательный): булевый, по умолчанию False.
+    :return:
+        200 OK: тайл получен и отправлен.
+        404 Not Found: тайл или файл не найдены.
+    """
     zoom_add_raster = request.args.get('zoom_add_raster', default=2, type=int)
     black = request.args.get('black', default=False, type=bool)
 
