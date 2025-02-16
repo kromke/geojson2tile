@@ -100,9 +100,15 @@ class FileHandler:
     def get_handle_dir(self, file):
         return os.path.join(self.handle_folder, get_basename(file))
 
-    def save_tile(self, id_, z, x, y):
+    def save_tile(self, layer_id, **kwargs):
+        z = kwargs.get('z')
+        x = kwargs.get('x')
+        y = kwargs.get('y')
+        za = kwargs.get('za')
+        blck = kwargs.get('blck')
+
         session_name = str(uuid4())
-        h_f = self.get_handle_dir(id_)
+        h_f = self.get_handle_dir(layer_id)
         if not os.path.exists(h_f):
             raise AssertionError("file not exists")
 
@@ -110,21 +116,26 @@ class FileHandler:
 
         bounds = self.get_bounds(x, y, z)
 
-        o_f = os.path.join(self.out_folder, id_, session_name)
-        ensure_folder_exists(o_f)
-        raster = self.rasterize(reprods, z, bounds, session_name)
-        vrt = self.get_vrt(raster, session_name)
-        color_table = self.get_color_table(h_f)
-        vrt = self.add_colors_to_vrt(vrt, color_table)
-        raster_c = self.get_colored_raster(vrt, session_name)
-        vrt_1 = vrt.replace('.vrt', '_1.vrt')
-        gdal.Translate(vrt_1, raster_c, format='VRT', rgbExpand='rgba')
+        out_folder = os.path.join(self.out_folder, layer_id, session_name)
+        ensure_folder_exists(out_folder)
+        
+        srs = None
+        if blck: 
+            srs = self.rasterize(reprods, z, bounds, session_name)
+        else:
+            raster = self.rasterize(reprods, z, bounds, session_name)
+            vrt = self.get_vrt(raster, session_name)
+            color_table = self.get_color_table(h_f)
+            vrt = self.add_colors_to_vrt(vrt, color_table)
+            raster_c = self.get_colored_raster(vrt, session_name)
+            srs = vrt.replace('.vrt', '_1.vrt')
+            gdal.Translate(srs, raster_c, format='VRT', rgbExpand='rgba')
 
         gdal2tiles(
             [
                 "this arg is required but ignored",
-                vrt_1,
-                o_f,
+                srs,
+                out_folder,
                 "-z",
                 f"{z}",
                 "-q",
@@ -138,8 +149,8 @@ class FileHandler:
         os.remove(raster)
         os.remove(vrt)
         os.remove(raster_c)
-        os.remove(vrt_1)
-        return o_f
+        os.remove(srs)
+        return out_folder
 
     def get_colored_raster(self, vrt, session_name):
         path = os.path.dirname(vrt)
@@ -194,11 +205,12 @@ class FileHandler:
         x_g, y_g = self.gm.GoogleTile(x, y, z)
         return self.gm.TileBounds(x_g, y_g, z)
 
-    def rasterize(self, reprods, zoom, bounds, session_name):
-        resolution = self.gm.Resolution(zoom + 2)
+    def rasterize(self, reprods, zoom, bounds, session_name, za, blck):
+        resolution = self.gm.Resolution(zoom + int(za))
         path = os.path.dirname(reprods)
         buffds = os.path.join(path, f"{session_name}.tif")
-        gdal.Rasterize(
+        if blck:
+            gdal.Rasterize(
             buffds,
             reprods,
             noData=0,
@@ -206,8 +218,21 @@ class FileHandler:
             yRes=resolution,
             outputBounds=bounds,
             outputType=gdal.GDT_Byte,
-            attribute='c'
-        )
+            burnValues=self.rgb,
+            creationOptions={"COMPRESS": "DEFLATE"}
+            )
+        else:
+            gdal.Rasterize(
+            buffds,
+            reprods,
+            noData=0,
+            xRes=resolution,
+            yRes=resolution,
+            outputBounds=bounds,
+            outputType=gdal.GDT_Byte,
+            attribute='c',
+            creationOptions={"COMPRESS": "DEFLATE"}
+            )
         return buffds
 
     def get_color_table(self, h_f):

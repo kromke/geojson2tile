@@ -69,7 +69,7 @@ def get_tile(layer_id, z, x, y):
     black = request.args.get('black', default=False, type=bool)
 
     try:
-        o_f = handler.save_tile(layer_id, z, x, y, zoom_add_raster, black)
+        o_f = handler.save_tile(layer_id, z=z, x=x, y=y, za=zoom_add_raster, blck=black)
     except AssertionError:
         return abort(404, description="Id not found")
 
