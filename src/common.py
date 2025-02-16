@@ -36,4 +36,3 @@ def send_and_remove_file(file_path, o_f):
 def get_basename(file):
     return os.path.basename(file).split(".")[0]
 
-
